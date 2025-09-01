@@ -21,7 +21,7 @@ from itertools import combinations
 
 # Variables globales
 persona = [1, 2, 5, 10]
-text_result = None  # lo usamos para mostrar resultados en Tkinter
+text_result = None 
 
 def imprimirTitulo(): 
     return "\n Practica Uno: The bridge and torch problem \n"
