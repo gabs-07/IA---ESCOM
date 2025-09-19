@@ -1,43 +1,27 @@
 import json
 import random
 import os
-import sys
-import tty
-import termios
 import copy
 from collections import deque
 #import heapq  # No se necesita porque A* está deshabilitado
 
 # --------------------------
-# Funciones básicas
-# --------------------------
-def clear_screen():
-    os.system('cls' if os.name == 'nt' else 'clear')
-
-def getch():
-    """Lee una tecla sin necesidad de Enter (Linux/Mac)"""
-    fd = sys.stdin.fileno()
-    old_settings = termios.tcgetattr(fd)
-    try:
-        tty.setraw(fd)
-        ch = sys.stdin.read(1)
-    finally:
-        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-    return ch
-
-# --------------------------
 # Generar laberinto
 # --------------------------
+
+#creación del laberinto con backtracking
 def crear_laberinto_con_backtracking(filas, columnas):
     laberinto_alto = filas * 2 + 1
     laberinto_ancho = columnas * 2 + 1
     laberinto = [['█'] * laberinto_ancho for _ in range(laberinto_alto)]
 
+    # Poner las paredes exteriores
     def excavar(fila, col):
         laberinto[fila][col] = ' '
         direcciones = [(0,2),(0,-2),(2,0),(-2,0)]
         random.shuffle(direcciones)
 
+        # Recorrer direcciones aleatorias
         for df, dc in direcciones:
             nueva_fila, nueva_col = fila + df, col + dc
             if 0 < nueva_fila < laberinto_alto and 0 < nueva_col < laberinto_ancho and laberinto[nueva_fila][nueva_col] == '█':
@@ -48,9 +32,11 @@ def crear_laberinto_con_backtracking(filas, columnas):
     excavar(1,1)
     return laberinto
 
+# Añadir caminos adicionales al laberinto
 def añadir_caminos(laberinto, numero_de_caminos=20):
     alto = len(laberinto)
     ancho = len(laberinto[0])
+    # Arreglar caminos adicionales
     for _ in range(numero_de_caminos):
         fila = random.randint(1, alto-2)
         col = random.randint(1, ancho-2)
@@ -58,6 +44,25 @@ def añadir_caminos(laberinto, numero_de_caminos=20):
             vecinos = sum([laberinto[fila+df][col+dc]==' ' for df,dc in [(-1,0),(1,0),(0,-1),(0,1)]])
             if vecinos >= 2:
                 laberinto[fila][col] = ' '
+
+# --------------------------
+# Funciones para guardar laberinto
+# --------------------------
+
+# Obtiene la ruta del directorio donde se encuentra el script y guarda el archivo .json
+ruta_del_directorio = os.path.dirname(os.path.abspath(__file__))
+
+## Cambia el directorio de trabajo actual a la ruta del script
+def guardar_json(laberinto, nombre_archivo="laberinto.json"):
+    with open(nombre_archivo, 'w') as f:
+        json.dump(laberinto, f, indent=4)
+    print(f"Laberinto guardado en {nombre_archivo}")
+
+## Cambia el directorio de trabajo actual a la ruta del script y guarda el archivo .apy
+def guardar_apy(laberinto, nombre_archivo="laberinto.apy"):
+    with open(nombre_archivo, 'w') as f:
+        json.dump(laberinto, f, indent=4)
+    print(f"Laberinto guardado en {nombre_archivo}")
 
 # --------------------------
 # Funciones BFS y DFS
@@ -130,7 +135,7 @@ def mostrar_laberinto(laberinto, camino, inicio, meta):
 # Función principal
 # --------------------------
 def main():
-    filas_logicas, columnas_logicas = 10, 10
+    filas_logicas, columnas_logicas = 20, 20
     laberinto = crear_laberinto_con_backtracking(filas_logicas, columnas_logicas)
     añadir_caminos(laberinto, 40)
 
@@ -151,6 +156,10 @@ def main():
     camino_dfs = dfs(laberinto, inicio, meta)
     print("Ruta DFS:")
     mostrar_laberinto(laberinto, camino_dfs, inicio, meta)
+
+    # Guardar el laberinto en archivos
+    guardar_json(laberinto)
+    guardar_apy(laberinto)
 
     # A* deshabilitado
     """
