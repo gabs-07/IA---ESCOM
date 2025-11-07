@@ -1,28 +1,21 @@
-# Script para el análisis y preprocesamiento de datasets
-# Este script realiza las siguientes tareas:
-# 1. Análisis exploratorio de datos (EDA)
-# 2. Manejo de valores faltantes
-# 3. Detección y tratamiento de outliers
-# 4. Codificación de variables categóricas
-# 5. Normalización de datos
+# Instalar las dependencias necesarias con pip:
+# pip install setuptools
+# pip install pandas
+# pip install numpy
+# pip install scipy
+# pip install scikit-learn
+# pip install ydata-profiling
 
-# Importación de bibliotecas necesarias
-import pandas as pd  # Para manipulación y análisis de datos
-import numpy as np   # Para operaciones numéricas
-from scipy import stats  # Para análisis estadístico
-from sklearn.preprocessing import LabelEncoder, StandardScaler  # Para preprocesamiento
-from ydata_profiling import ProfileReport  # Para generación de reportes EDA
-import os  # Para operaciones con el sistema de archivos
 
+import pandas as pd
+import numpy as np
+from scipy import stats
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+from ydata_profiling import ProfileReport
+import os
+
+# Función para manejar valores faltantes
 def manejar_valores_faltantes(df, umbral=0.1):
-    """
-    Maneja los valores faltantes en el DataFrame.
-    Args:
-        df: DataFrame a procesar
-        umbral: Porcentaje máximo de valores faltantes permitidos (default 0.1 = 10%)
-    Returns:
-        DataFrame procesado y lista de columnas imputadas
-    """
     columnas_faltantes = df.columns[df.isnull().mean() > umbral]
     columnas_imputadas = []
     for columna in columnas_faltantes:
@@ -33,30 +26,15 @@ def manejar_valores_faltantes(df, umbral=0.1):
         columnas_imputadas.append(columna)
     return df, list(columnas_imputadas)
 
+# Función para manejar valores atípicos usando winsorización
 def manejar_valores_atipicos(df, columnas, q=0.05):
-    """
-    Aplica winsorización para manejar valores atípicos.
-    Args:
-        df: DataFrame a procesar
-        columnas: Lista de columnas a procesar
-        q: Quantil para winsorización (default 0.05 = 5%)
-    Returns:
-        DataFrame con valores atípicos tratados
-    """
     for columna in columnas:
         if df[columna].dtype in ['int64', 'float64']:
             df[columna] = stats.mstats.winsorize(df[columna], limits=[q, q])
     return df
 
+# Nuevas funciones para EDA y detección de outliers
 def analizar_estructura(df, nombre):
-    """
-    Analiza la estructura básica del dataset y valores faltantes.
-    Args:
-        df: DataFrame a analizar
-        nombre: Nombre identificativo del dataset
-    Returns:
-        Lista de columnas con más del 10% de valores faltantes
-    """
     filas, columnas = df.shape
     print(f"\nEDA: Dataset {nombre}")
     print(f"Instancias (filas): {filas}, Atributos (columnas): {columnas}")
@@ -71,15 +49,6 @@ def analizar_estructura(df, nombre):
     return columnas_mas_10pct
 
 def detectar_outliers(df, columnas, z_thresh=3.0):
-    """
-    Detecta outliers usando el método de z-score.
-    Args:
-        df: DataFrame a analizar
-        columnas: Lista de columnas a revisar
-        z_thresh: Umbral de z-score (default 3.0)
-    Returns:
-        Diccionario con conteo de outliers por columna
-    """
     resumen_outliers = {}
     for col in columnas:
         if col in df.columns and df[col].dtype in ['int64', 'float64']:
@@ -103,42 +72,22 @@ def detectar_outliers(df, columnas, z_thresh=3.0):
         print("No se detectaron outliers por z-score > 3 en las columnas numéricas revisadas.")
     return resumen_outliers
 
+# Función para codificar variables categóricas
 def codificar_categoricas(df):
-    """
-    Codifica variables categóricas a numéricas usando LabelEncoder.
-    Args:
-        df: DataFrame con variables categóricas
-    Returns:
-        DataFrame con variables categóricas codificadas
-    """
     codificador = LabelEncoder()
     for columna in df.select_dtypes(include=['object']):
         df[columna] = codificador.fit_transform(df[columna].astype(str))
     return df
 
+# Función para normalizar el conjunto de datos
 def normalizar_datos(df):
-    """
-    Normaliza las variables numéricas usando StandardScaler.
-    Args:
-        df: DataFrame con variables numéricas
-    Returns:
-        DataFrame con variables numéricas normalizadas
-    """
     escalador = StandardScaler()
     columnas_numericas = df.select_dtypes(include=['int64', 'float64']).columns
     df[columnas_numericas] = escalador.fit_transform(df[columnas_numericas])
     return df
 
+# Función principal de procesamiento
 def procesar_dataset(ruta_archivo, nombre, generar_reporte=True):
-    """
-    Función principal que coordina todo el procesamiento del dataset.
-    Args:
-        ruta_archivo: Ruta al archivo CSV
-        nombre: Nombre identificativo del dataset
-        generar_reporte: Bool para generar reporte HTML (default True)
-    Returns:
-        Diccionario con resultados del procesamiento
-    """
     # Cargar dataset
     df = pd.read_csv(ruta_archivo)
     print(f"\nProcesando dataset {nombre}:")
@@ -187,27 +136,27 @@ def procesar_dataset(ruta_archivo, nombre, generar_reporte=True):
         "resumen_outliers": resumen_outliers
     }
 
-# Verificación inicial del entorno
+# Al inicio del script, después de los imports
 print(f"Directorio actual: {os.getcwd()}")
 print(f"¿El archivo existe?: {os.path.exists('Titanic-Dataset.csv')}")
 
-# Punto de entrada principal
+# Ejemplo de uso (modificar estas rutas con las rutas reales de tus datasets)
 if __name__ == "__main__":
-    """
-    Sección principal del script donde se definen las rutas de los datasets
-    y se ejecuta el procesamiento.
-    """
-    # Configuración de rutas de datasets
+    # Configura aquí las rutas a los dos datasets de Kaggle que elegiste (clasificación)
     ruta_dataset1 = "c:/Users/Gabriel Ruiz/IA---ESCOM/4.- Practica/Titanic-Dataset.csv"
-    ruta_dataset2 = "c:/Users/Gabriel Ruiz/IA---ESCOM/4.- Practica/segundo_dataset.csv"
+    #Iryam, pon la ruta del archivo donde esta el tester o poonlo directo de la carptea amiga 
+    #cuando lo corras, trata de no tener otro porceso, si ocupa mucha ram :(
+
+    # Ruta de ejemplo para un segundo dataset: editar con la ruta real
+    ruta_dataset2 = "c:/Users/Gabriel Ruiz/IA---ESCOM/4.- Practica/segundo_dataset.csv"  # <-- cambiar o dejar vacio el otro testser
     
-    # Procesamiento del primer dataset
+    # Procesar primer dataset si existe
     if os.path.exists(ruta_dataset1):
         resultado1 = procesar_dataset(ruta_dataset1, "Dataset1")
     else:
         print(f"No se encontró el archivo: {ruta_dataset1}")
     
-    # Procesamiento del segundo dataset
+    # Procesar segundo dataset si existe
     if ruta_dataset2 and os.path.exists(ruta_dataset2):
         resultado2 = procesar_dataset(ruta_dataset2, "Dataset2")
     else:

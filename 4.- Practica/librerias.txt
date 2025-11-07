@@ -1,0 +1,7 @@
+# Instalar las dependencias necesarias con pip:
+# pip install setuptools
+# pip install pandas
+# pip install numpy
+# pip install scipy
+# pip install scikit-learn
+# pip install ydata-profiling
